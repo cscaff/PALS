@@ -36,6 +36,10 @@ class PreferenceSUL:
         self.oracle = oracle
         self._overrides: dict[P2NodeKey, Action] = {}
         self._locked: set[P2NodeKey] = set()
+        # Membership-query cache. Queries are deterministic given the current
+        # overrides, so results are reusable across L*'s table refreshes; the
+        # cache is cleared whenever an override actually changes the answers.
+        self._cache: dict[tuple[Action, ...], tuple[Action | None, ...]] = {}
         self.num_queries = 0
 
     # ------------------------------------------------------------------
@@ -45,6 +49,10 @@ class PreferenceSUL:
     def query(self, p1_inputs: Sequence[Action]) -> tuple[Action | None, ...]:
         """Return P2's response after each P1 input (``None`` past the tree)."""
         self.num_queries += 1
+        cache_key = tuple(p1_inputs)
+        cached = self._cache.get(cache_key)
+        if cached is not None:
+            return cached
         env = self.env
         node = env.initial_state()
         trace: list[Action] = []
@@ -75,7 +83,9 @@ class PreferenceSUL:
             trace.append(p2)
             node = env.step(node, p2)
 
-        return tuple(outputs)
+        result = tuple(outputs)
+        self._cache[cache_key] = result
+        return result
 
     def _p2_response(self, trace_at_p2_node: Sequence[Action]) -> Action:
         key = tuple(trace_at_p2_node)
@@ -95,13 +105,17 @@ class PreferenceSUL:
         key = tuple(trace_at_p2_node)
         if key in self._locked:
             return False
-        self._overrides[key] = response
+        if self._overrides.get(key) != response:
+            self._overrides[key] = response
+            self._cache.clear()  # answers changed
         return True
 
     def patch(self, trace_at_p2_node: Sequence[Action], response: Action) -> None:
         """Install an override and lock it against further ``update_strategy``."""
         key = tuple(trace_at_p2_node)
-        self._overrides[key] = response
+        if self._overrides.get(key) != response:
+            self._overrides[key] = response
+            self._cache.clear()
         self._locked.add(key)
 
     def current_response(self, trace_at_p2_node: Sequence[Action]) -> Action | None:
