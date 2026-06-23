@@ -76,3 +76,29 @@ def test_current_response_matches_query():
 
 def test_p1_inputs_of_takes_even_indices():
     assert PreferenceSUL.p1_inputs_of(["a", "b", "c", "d"]) == ["a", "c"]
+
+
+def test_query_is_cached():
+    _, _, sul = _sul()
+    sul.query([(0, 1)])
+    assert ((0, 1),) in sul._cache
+    assert sul.query([(0, 1)]) == sul._cache[((0, 1),)]
+
+
+def test_cache_cleared_when_override_changes_answer():
+    env, oracle, sul = _sul()
+    sul.query([(0, 1)])
+    default = oracle.preferred_move([(0, 1)])
+    alternative = next(m for m in env.p2_legal_moves([(0, 1)]) if m != default)
+    sul.update_strategy([(0, 1)], alternative)
+    assert sul._cache == {}  # invalidated
+    assert sul.query([(0, 1)])[0] == alternative
+
+
+def test_cache_not_cleared_on_repeated_same_override():
+    env, _, sul = _sul()
+    legal = env.p2_legal_moves([(0, 1)])
+    sul.update_strategy([(0, 1)], legal[0])  # first set clears
+    sul.query([(0, 1)])  # repopulate
+    sul.update_strategy([(0, 1)], legal[0])  # unchanged value -> no clear
+    assert ((0, 1),) in sul._cache
