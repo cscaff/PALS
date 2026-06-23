@@ -75,3 +75,19 @@ class NimEnv(Environment):
         # from P2's perspective: +1 if P2 won, -1 if P1 won.
         winner = _other(state.player)
         return 1.0 if winner is Player.P2 else -1.0
+
+
+def largest_pile_heuristic(env: NimEnv, state: NimState) -> float:
+    """A deliberately *suboptimal* greedy heuristic for the preference oracle.
+
+    Scores a state by how much the largest pile dominates the total, ignoring
+    the nim-sum that actually determines the winner. This makes the oracle play
+    plausibly but not optimally — exactly the locally-optimal teacher PALS is
+    meant to improve upon. Scaled by 0.9 to stay strictly inside the terminal
+    payoff range, and signed to P2's perspective.
+    """
+    total = sum(state.piles)
+    if total == 0:
+        return 0.0
+    score = (max(state.piles) / total) * 0.9
+    return score if state.player is Player.P2 else -score
