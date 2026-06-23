@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pals"
+version = "0.1.0"
+description = "Preference-guided Active automata Learning for Symbolic RL"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "William Fishell" },
+    { name = "Christian Scaff" },
+]
+dependencies = [
+    "z3-solver>=4.12",
+    "gymnasium>=0.29",
+]
+
+[project.optional-dependencies]
+# Spot LTL model-checking backend. Optional: the default shielding backend is
+# the pure-Python safety-game solver, so the package works without Spot.
+spot = ["spot"]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["pals"]
+
+# --------------------------------------------------------------------------
+# Ruff — PEP8 lint + format (single tool).
+# --------------------------------------------------------------------------
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+extend-exclude = ["docs"]
+
+[tool.ruff.lint]
+# pycodestyle (E/W), pyflakes (F), isort (I), pep8-naming (N),
+# pyupgrade (UP), flake8-bugbear (B), comprehensions (C4).
+select = ["E", "W", "F", "I", "N", "UP", "B", "C4"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+# --------------------------------------------------------------------------
+# Pytest.
+# --------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra"
