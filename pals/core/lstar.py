@@ -75,11 +75,13 @@ class MealyLStar:
         sul: PreferenceSUL,
         eq_oracle: EquivalenceOracle,
         verbose: bool = False,
+        max_rounds: int = 1000,
     ) -> None:
         self.alphabet = list(alphabet)
         self.sul = sul
         self.eq_oracle = eq_oracle
         self.verbose = verbose
+        self.max_rounds = max_rounds
 
         self.S: list[tuple[Action, ...]] = [()]
         self.E: list[tuple[Action, ...]] = [(a,) for a in self.alphabet]
@@ -183,3 +185,8 @@ class MealyLStar:
 
             self._add_counterexample(cex)
             self._fill()  # SUL may have mutated; refresh the whole table
+
+            if round_num >= self.max_rounds:
+                raise RuntimeError(
+                    f"L* did not converge within {self.max_rounds} rounds"
+                )
