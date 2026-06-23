@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.png" alt="PALS logo" width="300">
+  <img src="assets/logo.png" alt="PALS logo" width="440">
 </p>
 
 <h1 align="center">PALS</h1>
