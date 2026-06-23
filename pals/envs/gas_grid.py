@@ -84,6 +84,7 @@ class GasGridEnv(Environment):
         gas_max: int = 4,
         max_steps: int = 20,
         eligible_cells: tuple[Cell, ...] | None = None,
+        gas_is_fatal: bool = True,
     ) -> None:
         self.rows = rows
         self.cols = cols
@@ -92,6 +93,10 @@ class GasGridEnv(Environment):
         self.dropoff = dropoff if dropoff is not None else (rows - 1, cols - 1)
         self.gas_max = gas_max
         self.max_steps = max_steps
+        # When False, running out of gas neither ends the episode nor affects
+        # reward — the preference oracle becomes gas-blind, so safety (G(gas>0))
+        # is *misaligned* with preference and only the shield can enforce it.
+        self.gas_is_fatal = gas_is_fatal
         if eligible_cells is None:
             eligible_cells = tuple(
                 (r, c)
@@ -193,17 +198,25 @@ class GasGridEnv(Environment):
         raise ValueError(f"illegal P2 action {action!r}")
 
     def is_terminal(self, state: GasGridState) -> bool:
-        return state.delivered or state.gas <= 0 or state.step_count >= self.max_steps
+        if state.delivered or state.step_count >= self.max_steps:
+            return True
+        return self.gas_is_fatal and state.gas <= 0
 
     def reward(self, state: GasGridState) -> float:
         if state.delivered:
             return 1.0
-        return -1.0  # gas-out or timeout without delivery
+        return -1.0  # gas-out (when fatal) or timeout without delivery
 
 
 def gas_depleted(state: GasGridState) -> bool:
     """Safety predicate for ``G(gas > 0)`` — the target of the shielding layer."""
     return state.gas <= 0
+
+
+def safety_state_key(state: GasGridState) -> tuple:
+    """Abstraction for the gas spec: drop step_count/delivered (the spec ignores
+    them), keeping the safety state space finite and patches state-keyed."""
+    return (state.pos, state.gas, state.task_loc, state.carrying, state.player)
 
 
 def manhattan_greedy_heuristic(env: GasGridEnv, state: GasGridState) -> float:
