@@ -285,8 +285,12 @@ def _noise_series(env, heuristic, oracle_depth, noises):
 def plot_noise() -> None:
     noises = [0.0, 0.1, 0.25, 0.5]
     games = [
-        ("Minimax (depth 6)", MinimaxEnv(depth=6, branching=2, seed=SEED),
-         leftmost_leaf_heuristic, 1),
+        (
+            "Minimax (depth 6)",
+            MinimaxEnv(depth=6, branching=2, seed=SEED),
+            leftmost_leaf_heuristic,
+            1,
+        ),
         ("Nim (1,2,3)", NimEnv(piles=(1, 2, 3)), largest_pile_heuristic, 1),
     ]
     fig, axes = plt.subplots(2, 2, figsize=(11, 8))
@@ -299,10 +303,20 @@ def plot_noise() -> None:
         ax_s.set_xlabel("oracle noise")
         ax_s.set_ylabel("vs_optimal")
         ax_s.legend()
-        ax_d.plot(noises, data["PALS"]["devs"], marker="o", color="tab:red",
-                  label="PALS (audit on)")
-        ax_d.plot(noises, data["PALS_no_mcts"]["devs"], marker="s", color="tab:blue",
-                  label="PALS_no_mcts (audit off)")
+        ax_d.plot(
+            noises,
+            data["PALS"]["devs"],
+            marker="o",
+            color="tab:red",
+            label="PALS (audit on)",
+        )
+        ax_d.plot(
+            noises,
+            data["PALS_no_mcts"]["devs"],
+            marker="s",
+            color="tab:blue",
+            label="PALS_no_mcts (audit off)",
+        )
         ax_d.set_title(f"{title} — accepted audit deviations")
         ax_d.set_xlabel("oracle noise")
         ax_d.set_ylabel("accepted deviations")
@@ -343,13 +357,22 @@ def plot_frozenlake_shielding() -> None:
         in_hole_predicate(env), name="G(not hole)", state_key=hole_safety_key
     )
     unshielded = run_pals(
-        env, MinimaxPreferenceOracle(env, heuristic, depth=4),
-        depth_n=2, rollout_budget=10, use_pac=False, rng=random.Random(SEED),
+        env,
+        MinimaxPreferenceOracle(env, heuristic, depth=4),
+        depth_n=2,
+        rollout_budget=10,
+        use_pac=False,
+        rng=random.Random(SEED),
     )
     shielded = run_pals(
-        env, MinimaxPreferenceOracle(env, heuristic, depth=4),
-        depth_n=2, rollout_budget=10, use_pac=False, spec=spec,
-        prefer_action=safe_goal_action(env), rng=random.Random(SEED),
+        env,
+        MinimaxPreferenceOracle(env, heuristic, depth=4),
+        depth_n=2,
+        rollout_budget=10,
+        use_pac=False,
+        spec=spec,
+        prefer_action=safe_goal_action(env),
+        rng=random.Random(SEED),
     )
     p_uns = _frozenlake_path(env, unshielded.model, (0, 0))
     p_shd = _frozenlake_path(env, shielded.model, (0, 0))
@@ -364,17 +387,37 @@ def plot_frozenlake_shielding() -> None:
         for c in range(env.cols):
             tile = env.desc[r][c]
             ax.add_patch(
-                plt.Rectangle((c, env.rows - 1 - r), 1, 1,
-                              facecolor=fill[tile], edgecolor="black")
+                plt.Rectangle(
+                    (c, env.rows - 1 - r), 1, 1, facecolor=fill[tile], edgecolor="black"
+                )
             )
-            ax.text(c + 0.5, env.rows - 1 - r + 0.5, tile, ha="center", va="center",
-                    fontsize=15, color="white" if tile == "H" else "black")
+            ax.text(
+                c + 0.5,
+                env.rows - 1 - r + 0.5,
+                tile,
+                ha="center",
+                va="center",
+                fontsize=15,
+                color="white" if tile == "H" else "black",
+            )
     ux, uy = zip(*[xy(p) for p in p_uns], strict=True)
     sx, sy = zip(*[xy(p) for p in p_shd], strict=True)
-    ax.plot(ux, uy, marker="o", color="tab:red", linewidth=2.5,
-            label="unshielded (crosses the hole)")
-    ax.plot(sx, sy, marker="s", color="tab:green", linewidth=2.5,
-            label="shielded (safe detour)")
+    ax.plot(
+        ux,
+        uy,
+        marker="o",
+        color="tab:red",
+        linewidth=2.5,
+        label="unshielded (crosses the hole)",
+    )
+    ax.plot(
+        sx,
+        sy,
+        marker="s",
+        color="tab:green",
+        linewidth=2.5,
+        label="shielded (safe detour)",
+    )
     ax.set_xlim(0, env.cols)
     ax.set_ylim(-0.4, env.rows)
     ax.set_aspect("equal")
