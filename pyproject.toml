@@ -22,6 +22,8 @@ dependencies = [
 # Spot LTL model-checking backend. Optional: the default shielding backend is
 # the pure-Python safety-game solver, so the package works without Spot.
 spot = ["spot"]
+# Plotting for the benchmark figures (scripts/plot_benchmarks.py).
+viz = ["matplotlib>=3.5"]
 dev = [
     "pytest>=8.0",
     "ruff>=0.6",
