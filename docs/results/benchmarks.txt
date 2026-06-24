@@ -42,6 +42,28 @@ Greedy                 0.867       0.000       0.000
 Optimal                1.000       1.000       1.000
 UCT                    0.900       0.367      -0.067
 QLearning              0.633      -1.000      -1.000
+### Noise sensitivity — Nim (1,2,3)
+config         noise  states  devs  vs_random  vs_greedy  vs_optimal
+--------------------------------------------------------------------
+PALS            0.00       6     2      1.000      1.000       1.000
+PALS            0.10       7     0      0.600      1.000       1.000
+PALS            0.25       6     1      1.000      1.000       1.000
+PALS            0.50       9     4      0.467      1.000      -1.000
+PALS_no_mcts    0.00       7     0      0.133      1.000       1.000
+PALS_no_mcts    0.10       7     0      0.600      1.000       1.000
+PALS_no_mcts    0.25       7     0      0.600      1.000       1.000
+PALS_no_mcts    0.50       8     0      0.267      1.000       1.000
+### Noise sensitivity — Minimax (depth 6, b=2)
+config         noise  states  devs  vs_random  vs_greedy  vs_optimal
+--------------------------------------------------------------------
+PALS            0.00       7     1     90.245     81.447      80.318
+PALS            0.10       6   217     85.521     56.751      56.751
+PALS            0.25       7    39     90.245     81.447      80.318
+PALS            0.50       6    21     84.222     54.028      44.797
+PALS_no_mcts    0.00       5     0     85.521     56.751      56.751
+PALS_no_mcts    0.10       5     0     78.251     56.751      56.751
+PALS_no_mcts    0.25       7     0     90.245     81.447      80.318
+PALS_no_mcts    0.50       7     0     87.660     81.447      80.318
 ### Active shielding — gas corridor, spec G(gas>0)
   unshielded: reachable G(gas>0) violation = True
   shielded:   reachable G(gas>0) violation = False  (safe patches = 1, delivers reward = 1.0)
