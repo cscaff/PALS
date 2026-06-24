@@ -64,12 +64,23 @@ safety. Result (`docs/results/benchmarks.txt`):
 
 - **Unshielded:** a reachable `G(gas>0)` violation exists (the controller drives
   the tank to zero on the fast path).
-- **Shielded:** **no** reachable violation; 3 state-keyed safe patches installed.
+- **Shielded (with `prefer_action`):** **no** reachable violation, exactly **1**
+  state-keyed safe patch, and the controller **still delivers** (reward 1.0):
+  `PICKUP → E → REFUEL → E → DROP` — one refuel inserted to stay safe.
 
 This is the demonstration the paper was missing. Method: a pure-Python backward-
 attractor safety-game solver + reachability model checker (no Spot dependency);
 the shield patches the SUL toward safe actions only where the spec would be
-violated, recovering preference-optimal play elsewhere.
+violated, recovering preference-optimal play elsewhere. See
+`docs/results/figures/shielding.png`.
+
+**Design point worth stating:** pure safety shielding can produce *safe-but-
+useless* controllers — if the safe strategy picks an arbitrary safe action it may
+abandon the task (e.g. refuel forever). Passing the preference as a tie-breaker
+(`prefer_action`) keeps the controller's preferred move wherever it is safe, so
+the shielded controller is both safe **and** task-completing. This is exactly the
+paper's "recover preference-optimal play where the spec permits" claim, and the
+codebase now demonstrates it concretely.
 
 ---
 

@@ -102,6 +102,23 @@ def optimal_player(heuristic: Heuristic) -> MinimaxPlayer:
     return MinimaxPlayer(heuristic, depth=None)
 
 
+def greedy_action(env: Environment, heuristic: Heuristic):
+    """A *state -> action* one-ply greedy policy. Useful as the shield's
+    ``prefer_action`` tie-breaker so the safe strategy keeps the controller's
+    preferred move wherever it is safe, falling back only where it is not."""
+
+    def choose(state: State) -> Action | None:
+        if env.is_terminal(state):
+            return None
+        actions = env.legal_actions(state)
+        if not actions:
+            return None
+        pick = max if env.current_player(state) is Player.P2 else min
+        return pick(actions, key=lambda a: heuristic(env, env.step(state, a)))
+
+    return choose
+
+
 # ----------------------------------------------------------------------
 # UCT (minimax-flavoured Monte Carlo tree search)
 # ----------------------------------------------------------------------

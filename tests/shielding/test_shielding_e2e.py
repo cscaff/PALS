@@ -7,6 +7,8 @@ safety spec, and the shield makes it safe — on the gas-grid where preference
 
 import random
 
+from pals.bench.evaluate import play_game
+from pals.bench.players import PALSPlayer, RandomPlayer, greedy_action
 from pals.core.learner import run_pals
 from pals.core.preference import MinimaxPreferenceOracle
 from pals.core.sul import PreferenceSUL
@@ -73,6 +75,27 @@ def test_shielded_controller_is_safe():
     # With the shield, no environment behaviour can drive gas to zero.
     assert find_violation(env, result.model, gas_depleted) is None
     assert result.shield_patches >= 1
+
+
+def test_shielded_controller_stays_safe_and_still_delivers():
+    # Passing the preference as a tie-breaker (prefer_action) makes the shield
+    # keep the controller's move wherever it is safe and refuel only where
+    # needed -- so the controller is both safe AND completes the task.
+    env = _corridor()
+    result = run_pals(
+        env,
+        _oracle(env),
+        depth_n=2,
+        rollout_budget=10,
+        use_pac=False,
+        spec=_spec(),
+        prefer_action=greedy_action(env, manhattan_greedy_heuristic),
+        rng=random.Random(0),
+    )
+    assert find_violation(env, result.model, gas_depleted) is None  # safe
+    assert result.shield_patches == 1  # one well-placed refuel patch
+    reward = play_game(env, RandomPlayer(), PALSPlayer(result.model), random.Random(0))
+    assert reward == 1.0  # delivered (recovers the objective the spec permits)
 
 
 def test_shield_oracle_patches_unsafe_then_converges():
