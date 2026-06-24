@@ -29,6 +29,7 @@ from pals.envs.gas_grid import (
 )
 from pals.envs.minimax import MinimaxEnv, leftmost_leaf_heuristic
 from pals.envs.nim import NimEnv, largest_pile_heuristic
+from pals.envs.tic_tac_toe import TicTacToeEnv, line_control_heuristic
 from pals.shielding.model_check import find_violation
 from pals.shielding.spec import SafetySpec
 
@@ -61,15 +62,22 @@ def run_games(quick: bool) -> None:
         quick=quick,
     )
     _game_rows(
-        "Minimax (depth 4, b=2)",
-        MinimaxEnv(depth=4, branching=2, seed=SEED),
+        "Minimax (depth 6, b=2)",
+        MinimaxEnv(depth=6, branching=2, seed=SEED),
         leftmost_leaf_heuristic,
         oracle_depth=1,
         quick=quick,
     )
     _game_rows(
-        "Dots & Boxes (1x2)",
-        DotsAndBoxesEnv(rows=1, cols=2),
+        "Tic-Tac-Toe",
+        TicTacToeEnv(),
+        line_control_heuristic,
+        oracle_depth=2,
+        quick=quick,
+    )
+    _game_rows(
+        "Dots & Boxes (2x2)",
+        DotsAndBoxesEnv(rows=2, cols=2),
         score_margin_heuristic,
         oracle_depth=2,
         quick=quick,

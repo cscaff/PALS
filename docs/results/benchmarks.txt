@@ -9,28 +9,39 @@ Greedy                 0.600       1.000       1.000
 Optimal                1.000       1.000       1.000
 UCT                    0.733      -0.200      -1.000
 QLearning              0.400      -1.000      -1.000
-### Minimax (depth 4, b=2)
+### Minimax (depth 6, b=2)
 strategy           vs_random   vs_greedy  vs_optimal
 ----------------------------------------------------
-PALS                  65.921      58.338      42.057
-PALS_no_mcts          75.714      58.338      42.057
-PALS_no_pac           65.706      58.338      42.057
-Random                51.313      56.287      41.866
-Greedy                69.077      58.338      42.057
-Optimal               63.797      75.580      51.127
-UCT                   72.543      60.062      45.383
-QLearning             66.953      75.580      42.057
-### Dots & Boxes (1x2)
+PALS                  89.904      81.447      80.318
+PALS_no_mcts          85.372      56.751      56.751
+PALS_no_pac           91.773      81.447      80.318
+Random                53.696      37.191      40.342
+Greedy                81.422      56.751      56.751
+Optimal               90.152      81.447      80.318
+UCT                   84.135      70.336      64.249
+QLearning             91.110      81.447      80.318
+### Tic-Tac-Toe
 strategy           vs_random   vs_greedy  vs_optimal
 ----------------------------------------------------
-PALS                  -0.067       0.000      -1.000
-PALS_no_mcts          -0.067       0.000      -1.000
-PALS_no_pac           -0.100       0.000      -1.000
-Random                -0.500      -0.733      -1.000
-Greedy                -0.200       0.000      -1.000
-Optimal                0.000       0.000      -1.000
-UCT                   -0.167      -0.633      -1.000
-QLearning             -0.033       0.000      -1.000
+PALS                   0.667       0.000       0.000
+PALS_no_mcts           0.933       0.000       0.000
+PALS_no_pac            0.833       0.000       0.000
+Random                -0.167      -1.000      -1.000
+Greedy                 0.833       0.000       0.000
+Optimal                0.833       0.000       0.000
+UCT                    0.767      -0.933      -0.833
+QLearning              0.533      -1.000      -1.000
+### Dots & Boxes (2x2)
+strategy           vs_random   vs_greedy  vs_optimal
+----------------------------------------------------
+PALS                   0.900       0.000       0.000
+PALS_no_mcts           0.967       0.000       0.000
+PALS_no_pac            0.900       0.000       0.000
+Random                 0.500      -0.633      -0.533
+Greedy                 0.867       0.000       0.000
+Optimal                1.000       1.000       1.000
+UCT                    0.900       0.367      -0.067
+QLearning              0.633      -1.000      -1.000
 ### Active shielding — gas corridor, spec G(gas>0)
   unshielded: reachable G(gas>0) violation = True
   shielded:   reachable G(gas>0) violation = False  (safe patches = 1, delivers reward = 1.0)

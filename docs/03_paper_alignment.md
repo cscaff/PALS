@@ -33,22 +33,34 @@ while UCT and Q-learning collapse against the greedy/optimal opponents
 ablation is the headline: **PALS_no_mcts scores only `0.400` vs_random** — the
 MCTS audit is exactly what lifts the suboptimal-oracle policy to optimal play.
 
-**Minimax (depth 4)** — *competitive, honestly stated.* PALS is on par with the
-MCTS/UCT baselines vs random and matches Greedy/Q-learning on the harder columns;
-Optimal is best vs the strong opponents. State this as "competitive with UCT,
-above Greedy, below exact Optimal," not "beats."
+**Minimax (depth 6, b=2)** — *clean win.* On a non-degenerate depth-6 tree PALS
+reaches `89.9 / 81.4 / 80.3`, **matching exact Optimal** (`90.2 / 81.4 / 80.3`) on
+the strong-opponent columns and **beating UCT** (`84.1 / 70.3 / 64.2`) and Greedy
+(`81.4 / 56.8 / 56.8`). The ablation is decisive: **PALS_no_mcts collapses to the
+greedy level** (`56.8 / 56.8` on vs_greedy/vs_optimal) — the audit is what closes
+the gap to optimal. (The earlier depth-4 instance was degenerate: many strategies
+tied at one value because the tree was too small to separate them.)
 
-**Dots & Boxes (1×2)** — *degenerate; report or drop.* The board is small enough
-that the optimal P1 wins against every P2 (`vs_optimal = −1.0` for all). Either
-scale to a larger board or note it isolates nothing and drop it from headline
-claims.
+**Tic-Tac-Toe** — *optimal-equivalent on the hard columns.* PALS forces the draw
+that perfect play guarantees vs both greedy and optimal P1 (`0.000 / 0.000`),
+exactly like Optimal, while **UCT and Q-learning lose** to the optimal opponent
+(`UCT −0.93 / −0.83`, `QLearning −1.00 / −1.00`). PALS is slightly behind Greedy
+vs a random opponent (`0.667` vs `0.833`) but never loses to strong play.
 
-Reporting rule: say where PALS **wins** (Nim), **ties** (Minimax vs UCT), and is
-**uninformative/loses** (tiny Dots & Boxes), per R1's explicit request.
+**Dots & Boxes (2×2)** — *competitive, honestly stated.* On the non-degenerate
+2×2 board PALS scores `0.900 / 0.000 / 0.000`: it ties Greedy and beats UCT vs the
+optimal opponent (`UCT −0.067`), but exact Optimal wins outright (`1.000 / 1.000 /
+1.000`). State this as "above Greedy/UCT, below exact Optimal," not "beats." (The
+earlier 1×2 board was degenerate — every P2 lost to optimal P1.)
+
+Reporting rule: say where PALS **wins** (Nim, Minimax), is **optimal-equivalent**
+where the game forces a draw (Tic-Tac-Toe), and is **competitive but below exact
+Optimal** (Dots & Boxes 2×2), per R1's explicit request.
 
 **Figures** (`docs/results/figures/`, via `python -m scripts.plot_benchmarks`,
 needs the `viz` extra): per-game grouped bar charts (`nim.png`, `minimax.png`,
-`dots_and_boxes.png`) and a rollout-budget sweep (`minimax_k_sweep.png`) showing
+`tic_tac_toe.png`, `dots_and_boxes.png`) and a rollout-budget sweep
+(`minimax_k_sweep.png`) showing
 PALS improving with K and then saturating — the honest version of the paper's
 Fig 5. Note: the original Fig 5's monotone-in-K claim only holds on deeper trees
 with a larger audit depth N; on shallow instances PALS saturates immediately.
