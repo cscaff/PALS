@@ -33,4 +33,4 @@ UCT                   -0.167      -0.633      -1.000
 QLearning             -0.033       0.000      -1.000
 ### Active shielding — gas corridor, spec G(gas>0)
   unshielded: reachable G(gas>0) violation = True
-  shielded:   reachable G(gas>0) violation = False  (safe patches installed = 3)
+  shielded:   reachable G(gas>0) violation = False  (safe patches = 1, delivers reward = 1.0)

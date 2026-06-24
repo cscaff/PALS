@@ -15,7 +15,9 @@ from __future__ import annotations
 import argparse
 import random
 
+from pals.bench.evaluate import play_game
 from pals.bench.harness import benchmark, format_table
+from pals.bench.players import PALSPlayer, RandomPlayer, greedy_action
 from pals.core.learner import run_pals
 from pals.core.preference import MinimaxPreferenceOracle
 from pals.envs.dots_and_boxes import DotsAndBoxesEnv, score_margin_heuristic
@@ -104,14 +106,18 @@ def run_shielding() -> None:
         rollout_budget=10,
         use_pac=False,
         spec=spec,
+        prefer_action=greedy_action(env, manhattan_greedy_heuristic),
         rng=random.Random(SEED),
     )
     unsafe = find_violation(env, unshielded.model, gas_depleted)
     safe = find_violation(env, shielded.model, gas_depleted)
+    delivers = play_game(
+        env, RandomPlayer(), PALSPlayer(shielded.model), random.Random(SEED)
+    )
     print(f"  unshielded: reachable G(gas>0) violation = {unsafe is not None}")
     print(
         f"  shielded:   reachable G(gas>0) violation = {safe is not None}"
-        f"  (safe patches installed = {shielded.shield_patches})"
+        f"  (safe patches = {shielded.shield_patches}, delivers reward = {delivers})"
     )
 
 

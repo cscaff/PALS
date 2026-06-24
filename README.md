@@ -25,6 +25,27 @@ modest assumptions on the game structure. To the best of our knowledge, *PALS*
 is the first algorithm that fully symbolically learns reinforcement-learning
 policies for agents in games via automata learning.
 
+## Results
+
+PALS learns a fully-symbolic policy from a *suboptimal* preference oracle and
+recovers strong play. On Nim it matches optimal play across opponents, while the
+MCTS-audit ablation (`PALS_no_mcts`) drops sharply — the audit is what lifts the
+suboptimal oracle to optimal:
+
+![Nim benchmark](docs/results/figures/nim.png)
+
+The MCTS rollout budget `K` trades compute for quality (and then saturates):
+
+![Minimax K-sweep](docs/results/figures/minimax_k_sweep.png)
+
+The shielding layer enforces a safety spec the preference oracle ignores. Here the
+gas-blind policy runs the tank to zero (`G(gas>0)` violated); the shield inserts a
+single refuel to stay safe **and still delivers**:
+
+![Active shielding](docs/results/figures/shielding.png)
+
+Regenerate with `pip install -e ".[viz]" && python -m scripts.plot_benchmarks`.
+
 ## Getting started
 
 ```bash
