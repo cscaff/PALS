@@ -1,0 +1,36 @@
+### Nim (1,2,3)
+strategy           vs_random   vs_greedy  vs_optimal
+----------------------------------------------------
+PALS                   1.000       1.000       1.000
+PALS_no_mcts           0.400       1.000       1.000
+PALS_no_pac            0.733       1.000       1.000
+Random                -0.133       0.133      -0.867
+Greedy                 0.600       1.000       1.000
+Optimal                1.000       1.000       1.000
+UCT                    0.733      -0.200      -1.000
+QLearning              0.400      -1.000      -1.000
+### Minimax (depth 4, b=2)
+strategy           vs_random   vs_greedy  vs_optimal
+----------------------------------------------------
+PALS                  65.921      58.338      42.057
+PALS_no_mcts          75.714      58.338      42.057
+PALS_no_pac           65.706      58.338      42.057
+Random                51.313      56.287      41.866
+Greedy                69.077      58.338      42.057
+Optimal               63.797      75.580      51.127
+UCT                   72.543      60.062      45.383
+QLearning             66.953      75.580      42.057
+### Dots & Boxes (1x2)
+strategy           vs_random   vs_greedy  vs_optimal
+----------------------------------------------------
+PALS                  -0.067       0.000      -1.000
+PALS_no_mcts          -0.067       0.000      -1.000
+PALS_no_pac           -0.100       0.000      -1.000
+Random                -0.500      -0.733      -1.000
+Greedy                -0.200       0.000      -1.000
+Optimal                0.000       0.000      -1.000
+UCT                   -0.167      -0.633      -1.000
+QLearning             -0.033       0.000      -1.000
+### Active shielding — gas corridor, spec G(gas>0)
+  unshielded: reachable G(gas>0) violation = True
+  shielded:   reachable G(gas>0) violation = False  (safe patches installed = 3)
