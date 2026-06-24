@@ -2,8 +2,9 @@
 
 Runs the harness on each game-theoretic environment (PALS + ablations vs the
 baselines, scored against random / greedy / optimal opponents), a noise-
-sensitivity sweep over the preference oracle, and the active-shielding
-experiment on the gas grid, printing fixed-width tables.
+sensitivity sweep over the preference oracle, and two active-shielding
+experiments (the gas grid and a FrozenLake corridor), printing fixed-width
+tables.
 
     python -m scripts.run_benchmarks          # all games + shielding
     python -m scripts.run_benchmarks --quick  # smaller budgets
@@ -22,7 +23,15 @@ from pals.bench.noisy import NoisyOracle
 from pals.bench.players import PALSPlayer, RandomPlayer, greedy_action
 from pals.core.learner import run_pals
 from pals.core.preference import MinimaxPreferenceOracle
+from pals.envs.base import Player
 from pals.envs.dots_and_boxes import DotsAndBoxesEnv, score_margin_heuristic
+from pals.envs.frozen_lake import (
+    FrozenLakeEnv,
+    in_hole_predicate,
+    manhattan_progress_heuristic,
+    safe_goal_action,
+)
+from pals.envs.frozen_lake import safety_state_key as hole_safety_key
 from pals.envs.gas_grid import (
     GasGridEnv,
     gas_depleted,
@@ -201,6 +210,70 @@ def run_shielding() -> None:
     )
 
 
+def _frozenlake_route(env, model, spawn):
+    """Drive the learned controller deterministically from ``spawn`` to a terminal
+    state; return ``(p2_moves, terminal_reward)``."""
+    state = env.step(env.initial_state(), ("SPAWN", spawn))
+    trace = [("SPAWN", spawn)]
+    moves = []
+    player = PALSPlayer(model)
+    while not env.is_terminal(state):
+        if env.current_player(state) is Player.P1:
+            obs = env.legal_actions(state)[0]
+            state = env.step(state, obs)
+            trace.append(obs)
+        else:
+            action = player.action(env, trace, random.Random(SEED))
+            state = env.step(state, action)
+            trace.append(action)
+            moves.append(action)
+    return moves, env.reward(state)
+
+
+def run_frozenlake_shielding() -> None:
+    # Second shielding demo (after the gas grid): a FrozenLake corridor where the
+    # straight path crosses a hole. With holes_are_fatal=False the preference
+    # oracle is hole-blind, so safety (G(not hole)) is misaligned with preference
+    # and only the shield can enforce it — the controller must detour.
+    print("\n### Active shielding #2 — FrozenLake 'SHG'/'FFF', spec G(not hole)")
+    env = FrozenLakeEnv(desc=("SHG", "FFF"), holes_are_fatal=False)
+    heuristic = manhattan_progress_heuristic
+    is_hole = in_hole_predicate(env)
+    spec = SafetySpec(is_hole, name="G(not hole)", state_key=hole_safety_key)
+
+    unshielded = run_pals(
+        env,
+        MinimaxPreferenceOracle(env, heuristic, depth=4),
+        depth_n=2,
+        rollout_budget=10,
+        use_pac=False,
+        rng=random.Random(SEED),
+    )
+    shielded = run_pals(
+        env,
+        MinimaxPreferenceOracle(env, heuristic, depth=4),
+        depth_n=2,
+        rollout_budget=10,
+        use_pac=False,
+        spec=spec,
+        prefer_action=safe_goal_action(env),
+        rng=random.Random(SEED),
+    )
+    unsafe = find_violation(env, unshielded.model, is_hole)
+    safe = find_violation(env, shielded.model, is_hole)
+    u_route, u_reward = _frozenlake_route(env, unshielded.model, (0, 0))
+    s_route, s_reward = _frozenlake_route(env, shielded.model, (0, 0))
+    print(
+        f"  unshielded: reachable G(not hole) violation = {unsafe is not None}"
+        f"  (route from S {u_route}, crosses the hole, reward = {u_reward})"
+    )
+    print(
+        f"  shielded:   reachable G(not hole) violation = {safe is not None}"
+        f"  (safe patches = {shielded.shield_patches}, route from S {s_route},"
+        f" reward = {s_reward})"
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--quick", action="store_true")
@@ -208,6 +281,7 @@ def main() -> None:
     run_games(args.quick)
     run_noise(args.quick)
     run_shielding()
+    run_frozenlake_shielding()
 
 
 if __name__ == "__main__":

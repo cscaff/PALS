@@ -94,6 +94,25 @@ the shielded controller is both safe **and** task-completing. This is exactly th
 paper's "recover preference-optimal play where the spec permits" claim, and the
 codebase now demonstrates it concretely.
 
+**Second shielding demo — FrozenLake (toy-text).** A second, independent
+instance on a different environment, to show the shield is not gas-grid-specific.
+Setup: the non-slippery FrozenLake corridor `SHG / FFF`, spec `G(not hole)`, with
+`holes_are_fatal=False` so the hole-blind preference oracle is again **misaligned**
+with safety. Result (`docs/results/benchmarks.txt`):
+
+- **Unshielded:** a reachable `G(not hole)` violation exists — the controller
+  takes the straight path `RIGHT → RIGHT` *through* the hole to the goal.
+- **Shielded (with `prefer_action = safe_goal_action`):** **no** reachable
+  violation, exactly **1** state-keyed patch, and the controller **still reaches
+  the goal** (reward 1.0) via the detour `DOWN → RIGHT → RIGHT → UP`.
+
+Same backward-attractor solver and lazy state-keyed patching as the gas demo;
+together the two demos show the shielding layer is generic across environments.
+Implementation note: FrozenLake makes off-grid moves *illegal* (no "stay" no-ops),
+which removes the degenerate self-loops a hole-blind greedy oracle would otherwise
+get safely stuck on — without that, the shielded controller is safe but never
+reaches the goal, a concrete instance of the safe-but-useless failure above.
+
 ---
 
 ## 4. Oracle implementation & sensitivity (R1)

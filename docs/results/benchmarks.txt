@@ -67,3 +67,6 @@ PALS_no_mcts    0.50       7     0     87.660     81.447      80.318
 ### Active shielding — gas corridor, spec G(gas>0)
   unshielded: reachable G(gas>0) violation = True
   shielded:   reachable G(gas>0) violation = False  (safe patches = 1, delivers reward = 1.0)
+### Active shielding #2 — FrozenLake 'SHG'/'FFF', spec G(not hole)
+  unshielded: reachable G(not hole) violation = True  (route from S ['RIGHT', 'RIGHT'], crosses the hole, reward = 1.0)
+  shielded:   reachable G(not hole) violation = False  (safe patches = 1, route from S ['DOWN', 'RIGHT', 'RIGHT', 'UP'], reward = 1.0)
