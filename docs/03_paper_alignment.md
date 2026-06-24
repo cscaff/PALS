@@ -106,10 +106,30 @@ codebase now demonstrates it concretely.
   suboptimal teacher. State this explicitly per benchmark.
 - **Sensitivity to noise:** `NoisyOracle` wraps any oracle and corrupts a `noise`
   fraction of answers, *consistently per input* (a fixed but imperfect teacher).
-  Finding to report: PALS's **L\*+PAC** core learns the imperfect target and
-  terminates under noise, but the **MCTS audit's termination (Thm 2) assumes
-  consistent / history-independent preferences**, which noise violates. State this
-  as a scoping condition on Theorem 2.
+  The sweep is reproducible — see the two "Noise sensitivity" tables in
+  `docs/results/benchmarks.txt` (`python -m scripts.run_benchmarks`, seed 0;
+  noise ∈ {0, 0.1, 0.25, 0.5} on Nim and Minimax, full PALS vs the audit-off
+  `PALS_no_mcts` core).
+
+  Measured finding (state precisely; the earlier "audit fails to terminate"
+  phrasing was too strong — it does terminate, but degrades):
+  - The **L\*+PAC core (`PALS_no_mcts`) is robust**: automaton size stays small
+    (5–8 states) and play quality is stable as noise grows — on Minimax it holds
+    `81.4 / 80.3` on vs_greedy/vs_optimal at every noise level including 0.5.
+  - The **MCTS audit degrades under inconsistent preferences**: accepted
+    deviations explode (Minimax `1 → 217` at noise 0.1, `39` at 0.25), and at
+    **noise 0.5 the full PALS is *worse* than its audit-off core** on vs_optimal
+    (`44.8` vs `80.3`) — the audit chases noise-induced "deviations" that do not
+    reflect real strategic gains.
+  - On **Tic-Tac-Toe** (large alphabet) the same effect is dramatic: the audit's
+    deviation count and automaton blow up with noise (states `76 → 257`,
+    deviations `0 → 218`, runtime `0.4 s → 286 s` at noise 0.5), which is why TTT
+    is kept out of the default fast sweep and documented here instead.
+  - **Take-away for the paper:** Theorem 2's termination/optimality assumes
+    consistent, history-independent preferences (Assumption 1). Under a noisy
+    teacher the audit still halts (via L*'s round cap) but loses its guarantee and
+    can hurt; the L\*+PAC path remains a robust fallback. Frame this as the
+    practical scoping condition on Theorem 2, with the tables as evidence.
 
 ---
 

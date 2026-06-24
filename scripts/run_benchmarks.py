@@ -1,8 +1,9 @@
 """Reproducible benchmark suite for the paper's results tables.
 
 Runs the harness on each game-theoretic environment (PALS + ablations vs the
-baselines, scored against random / greedy / optimal opponents) and the
-active-shielding experiment on the gas grid, printing fixed-width tables.
+baselines, scored against random / greedy / optimal opponents), a noise-
+sensitivity sweep over the preference oracle, and the active-shielding
+experiment on the gas grid, printing fixed-width tables.
 
     python -m scripts.run_benchmarks          # all games + shielding
     python -m scripts.run_benchmarks --quick  # smaller budgets
@@ -15,8 +16,9 @@ from __future__ import annotations
 import argparse
 import random
 
-from pals.bench.evaluate import play_game
-from pals.bench.harness import benchmark, format_table
+from pals.bench.evaluate import evaluate_vs_opponents, play_game
+from pals.bench.harness import benchmark, format_table, standard_opponents
+from pals.bench.noisy import NoisyOracle
 from pals.bench.players import PALSPlayer, RandomPlayer, greedy_action
 from pals.core.learner import run_pals
 from pals.core.preference import MinimaxPreferenceOracle
@@ -84,6 +86,76 @@ def run_games(quick: bool) -> None:
     )
 
 
+def _noise_rows(name, env, heuristic, *, oracle_depth, quick):
+    """Sweep oracle noise and report, per config, the learned automaton size,
+    accepted audit deviations, and play quality vs each opponent.
+
+    Contrasts the full PALS (audit on) against the L*+PAC core (audit off) under
+    a *consistently imperfect* teacher (``NoisyOracle`` corrupts a fixed fraction
+    of answers, deterministically per input). The point R1 asked about: the
+    L*+PAC core stays small and robust as noise grows, whereas the MCTS audit
+    accepts ever more deviations (its Thm-2 termination assumes consistent
+    preferences, which noise violates) and play quality degrades.
+    """
+    print(f"\n### Noise sensitivity — {name}")
+    print(
+        f"{'config':<14}{'noise':>6}{'states':>8}{'devs':>6}"
+        f"{'vs_random':>11}{'vs_greedy':>11}{'vs_optimal':>12}"
+    )
+    print("-" * 68)
+    noises = (0.0, 0.25) if quick else (0.0, 0.1, 0.25, 0.5)
+    opponents = standard_opponents(heuristic)
+    n_games = 15 if quick else 30
+    for use_mcts in (True, False):
+        config = "PALS" if use_mcts else "PALS_no_mcts"
+        for noise in noises:
+            inner = MinimaxPreferenceOracle(env, heuristic, depth=oracle_depth)
+            oracle = NoisyOracle(inner, env, noise=noise, seed=SEED)
+            result = run_pals(
+                env,
+                oracle,
+                use_mcts=use_mcts,
+                use_pac=True,
+                depth_n=2,
+                rollout_budget=30 if quick else 80,
+                rng=random.Random(SEED),
+            )
+            scores = evaluate_vs_opponents(
+                env,
+                PALSPlayer(result.model),
+                opponents,
+                n_games=n_games,
+                rng=random.Random(SEED),
+            )
+            print(
+                f"{config:<14}{noise:>6.2f}{len(result.model.states):>8}"
+                f"{result.accepted_deviations:>6}"
+                f"{scores['vs_random']:>11.3f}{scores['vs_greedy']:>11.3f}"
+                f"{scores['vs_optimal']:>12.3f}"
+            )
+
+
+def run_noise(quick: bool) -> None:
+    # Fast games only: under high noise the audit's deviation count (and so the
+    # automaton, and runtime) blows up on large-alphabet games like Tic-Tac-Toe
+    # — that blowup is documented in docs/03_paper_alignment.md §4 rather than
+    # baked into the default suite.
+    _noise_rows(
+        "Nim (1,2,3)",
+        NimEnv(piles=(1, 2, 3)),
+        largest_pile_heuristic,
+        oracle_depth=1,
+        quick=quick,
+    )
+    _noise_rows(
+        "Minimax (depth 6, b=2)",
+        MinimaxEnv(depth=6, branching=2, seed=SEED),
+        leftmost_leaf_heuristic,
+        oracle_depth=1,
+        quick=quick,
+    )
+
+
 def run_shielding() -> None:
     print("\n### Active shielding — gas corridor, spec G(gas>0)")
     env = GasGridEnv(
@@ -134,6 +206,7 @@ def main() -> None:
     parser.add_argument("--quick", action="store_true")
     args = parser.parse_args()
     run_games(args.quick)
+    run_noise(args.quick)
     run_shielding()
 
 
