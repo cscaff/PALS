@@ -46,6 +46,13 @@ claims.
 Reporting rule: say where PALS **wins** (Nim), **ties** (Minimax vs UCT), and is
 **uninformative/loses** (tiny Dots & Boxes), per R1's explicit request.
 
+**Figures** (`docs/results/figures/`, via `python -m scripts.plot_benchmarks`,
+needs the `viz` extra): per-game grouped bar charts (`nim.png`, `minimax.png`,
+`dots_and_boxes.png`) and a rollout-budget sweep (`minimax_k_sweep.png`) showing
+PALS improving with K and then saturating — the honest version of the paper's
+Fig 5. Note: the original Fig 5's monotone-in-K claim only holds on deeper trees
+with a larger audit depth N; on shallow instances PALS saturates immediately.
+
 ---
 
 ## 3. The active-shielding experiment (R1's #1 ask)
