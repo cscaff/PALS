@@ -108,11 +108,7 @@ class FrozenLakeEnv(Environment):
                 return True
             for dr, dc in _MOVES.values():
                 nxt = (cell[0] + dr, cell[1] + dc)
-                if (
-                    self._in_bounds(nxt)
-                    and nxt not in self.holes
-                    and nxt not in seen
-                ):
+                if self._in_bounds(nxt) and nxt not in self.holes and nxt not in seen:
                     seen.add(nxt)
                     queue.append(nxt)
         return False

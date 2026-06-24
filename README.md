@@ -38,11 +38,24 @@ The MCTS rollout budget `K` trades compute for quality (and then saturates):
 
 ![Minimax K-sweep](docs/results/figures/minimax_k_sweep.png)
 
+Under a *noisy* (inconsistent) oracle, the `L*`+PAC core stays robust while the
+MCTS audit degrades — its accepted deviations explode and its quality can drop
+below the audit-off core. This scopes the audit's termination guarantee
+(Theorem 2 assumes consistent preferences):
+
+![Noise sensitivity](docs/results/figures/noise_sensitivity.png)
+
 The shielding layer enforces a safety spec the preference oracle ignores. Here the
 gas-blind policy runs the tank to zero (`G(gas>0)` violated); the shield inserts a
 single refuel to stay safe **and still delivers**:
 
 ![Active shielding](docs/results/figures/shielding.png)
+
+A second shielding demo on Gymnasium's (non-slippery) FrozenLake: the hole-blind
+policy walks straight through a hole (`G(not hole)` violated), while the shielded
+controller detours around it with a single patch **and still reaches the goal**:
+
+![FrozenLake shielding](docs/results/figures/frozenlake_shielding.png)
 
 Regenerate with `pip install -e ".[viz]" && python -m scripts.plot_benchmarks`.
 
@@ -62,7 +75,7 @@ python -m scripts.run_benchmarks --quick   # results tables + shielding demo
 | `pals/core/` | Mealy L\*, mutable SUL, Table B, SMT valuer, preference oracle, `run_pals` |
 | `pals/oracles/` | equivalence oracles: MCTS audit, PAC, composite, bounded-exact |
 | `pals/shielding/` | safety-game solver, model checker, shield oracle, spec |
-| `pals/envs/` | Nim, Tic-Tac-Toe, Dots & Boxes, Minimax, gas-grid (behind one `Environment` ABC) |
+| `pals/envs/` | Nim, Tic-Tac-Toe, Dots & Boxes, Minimax, gas-grid, FrozenLake (behind one `Environment` ABC) |
 | `pals/bench/` | players/baselines, evaluation, benchmark harness, noisy-oracle wrapper |
 | `docs/` | holistic review, build plan, paper-alignment guide, results |
 
