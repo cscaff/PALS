@@ -40,6 +40,10 @@ from pals.envs.gas_grid import (  # noqa: E402
 )
 from pals.envs.minimax import MinimaxEnv, leftmost_leaf_heuristic  # noqa: E402
 from pals.envs.nim import NimEnv, largest_pile_heuristic  # noqa: E402
+from pals.envs.tic_tac_toe import (  # noqa: E402
+    TicTacToeEnv,
+    line_control_heuristic,
+)
 from pals.shielding.spec import SafetySpec  # noqa: E402
 
 SEED = 0
@@ -49,15 +53,22 @@ GAMES = [
     ("nim", "Nim (1,2,3)", NimEnv(piles=(1, 2, 3)), largest_pile_heuristic, 1),
     (
         "minimax",
-        "Minimax (depth 4, b=2)",
-        MinimaxEnv(depth=4, branching=2, seed=SEED),
+        "Minimax (depth 6, b=2)",
+        MinimaxEnv(depth=6, branching=2, seed=SEED),
         leftmost_leaf_heuristic,
         1,
     ),
     (
+        "tic_tac_toe",
+        "Tic-Tac-Toe",
+        TicTacToeEnv(),
+        line_control_heuristic,
+        2,
+    ),
+    (
         "dots_and_boxes",
-        "Dots & Boxes (1x2)",
-        DotsAndBoxesEnv(rows=1, cols=2),
+        "Dots & Boxes (2x2)",
+        DotsAndBoxesEnv(rows=2, cols=2),
         score_margin_heuristic,
         2,
     ),
