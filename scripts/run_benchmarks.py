@@ -174,12 +174,57 @@ def run_noise(quick: bool) -> None:
 # it scales with the grid rather than staying at the 1x3 corridor's value of 2.
 GasGridConfig = dict
 GAS_GRID_CONFIGS: tuple[GasGridConfig, ...] = (
-    {"rows": 1, "cols": 3, "home": (0, 0), "refuel": (0, 1), "dropoff": (0, 2), "gas_max": 3},  # noqa: E501
-    {"rows": 2, "cols": 2, "home": (0, 0), "refuel": (1, 0), "dropoff": (1, 1), "gas_max": 4},  # noqa: E501
-    {"rows": 3, "cols": 2, "home": (0, 1), "refuel": (1, 0), "dropoff": (2, 1), "gas_max": 6},  # noqa: E501
-    {"rows": 3, "cols": 3, "home": (2, 0), "refuel": (1, 1), "dropoff": (0, 2), "gas_max": 9},  # noqa: E501
-    {"rows": 3, "cols": 3, "home": (0, 0), "refuel": (2, 1), "dropoff": (2, 2), "gas_max": 9},  # noqa: E501
-    {"rows": 4, "cols": 4, "home": (0, 0), "refuel": (2, 2), "dropoff": (3, 3), "gas_max": 16, "use_pac": True, "rollout_budget": 50, "depth_n": 4},  # noqa: E501
+    {
+        "rows": 1,
+        "cols": 3,
+        "home": (0, 0),
+        "refuel": (0, 1),
+        "dropoff": (0, 2),
+        "gas_max": 3,
+    },  # noqa: E501
+    {
+        "rows": 2,
+        "cols": 2,
+        "home": (0, 0),
+        "refuel": (1, 0),
+        "dropoff": (1, 1),
+        "gas_max": 4,
+    },  # noqa: E501
+    {
+        "rows": 3,
+        "cols": 2,
+        "home": (0, 1),
+        "refuel": (1, 0),
+        "dropoff": (2, 1),
+        "gas_max": 6,
+    },  # noqa: E501
+    {
+        "rows": 3,
+        "cols": 3,
+        "home": (2, 0),
+        "refuel": (1, 1),
+        "dropoff": (0, 2),
+        "gas_max": 9,
+    },  # noqa: E501
+    {
+        "rows": 3,
+        "cols": 3,
+        "home": (0, 0),
+        "refuel": (2, 1),
+        "dropoff": (2, 2),
+        "gas_max": 9,
+    },  # noqa: E501
+    {
+        "rows": 4,
+        "cols": 4,
+        "home": (0, 0),
+        "refuel": (2, 2),
+        "dropoff": (3, 3),
+        "gas_max": 16,
+        "use_pac": True,
+        "rollout_budget": 50,
+        "depth_n": 4,
+    },  # noqa: E501
 )
 
 
@@ -296,7 +341,6 @@ def run_gas_grid_shielding() -> list[dict]:
             f"{r['delivers']:>8.1f}{str(r['success']):>4}{r['runtime_s']:>8.1f}"
         )
     return results
-
 
 
 def _frozenlake_route(env, model, spawn):
