@@ -68,6 +68,30 @@ ruff check . && ruff format --check .
 python -m scripts.run_benchmarks --quick   # results tables + shielding demo
 ```
 
+### Try it yourself
+
+Interactive demos that drive the same `run_pals` / model-checking code paths as
+the tests and benchmarks — useful for sanity-checking the system without reading
+the internals:
+
+```bash
+# Play a game vs the learned policy (games: nim, ttt, dots, minimax):
+python -m scripts.demo play nim
+python -m scripts.demo play ttt --show-policy        # also print the learned Mealy machine
+python -m scripts.demo play nim --opponent optimal    # no typing: watch PALS beat optimal
+python -m scripts.demo play dots --opponent random
+python -m scripts.demo play minimax --opponent optimal
+
+# Walk the agent through the grid one step at a time (press Enter to advance):
+# the unshielded policy runs the tank dry / steps into the hole, then the
+# shielded one refuels / detours.
+python -m scripts.demo shield gas
+python -m scripts.demo shield frozenlake              # second demo (hole avoidance)
+python -m scripts.demo shield gas --only unshielded   # just the no-shield run (it violates)
+python -m scripts.demo shield gas --delay 0.7         # auto-advance instead of Enter
+python -m scripts.demo shield gas --delay 0           # print all frames at once
+```
+
 ## Repository
 
 | Path | Contents |
